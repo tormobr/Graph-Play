@@ -139,11 +139,27 @@ class Game():
                     q.append((n, new_path))
                 n.update_value(4)
 
-            self.update_screen(200)
+            self.update_screen(300)
             current.update_value(5)
 
-    def manhatten(self, n):
-        return math.sqrt(abs(self.end.x - n.x)**2 + abs(self.end.y - n.y)**2)
+    def manhatten(self, n, h_factor=2):
+        ret = abs(self.end.x - n.x)//20 + abs(self.end.y - n.y)//20
+        return ret * h_factor
+        return ret
+
+    def sort_astar(self, q):
+        current, path, f_score = q[0]
+        best = f_score + self.manhatten(current)
+        for n, p, f in q[1:]:
+            new_score = f + self.manhatten(n)
+            if new_score < best:
+                current = n 
+                path = p 
+                f_score = f
+                best = new_score
+        q.remove((current, path, f_score))
+        return (current, path, f_score)
+        
 
     def astar(self):
         self.reset()
@@ -151,8 +167,7 @@ class Game():
         visited = set()
 
         while q:
-            q = sorted(q, key=lambda x: x[2] + self.manhatten(x[0]))
-            current, path, f = q.pop(0)
+            current, path, f = self.sort_astar(q)
             if current in visited:
                 continue
             visited.add(current)
@@ -169,7 +184,7 @@ class Game():
                 q.append((n, new_path, f+1))
                 n.update_value(4)
 
-            self.update_screen(200)
+            self.update_screen(300)
             current.update_value(5)
 
     def get_neighbors(self, n):
@@ -200,7 +215,7 @@ class Game():
                 self.check_collision(pos, self.fill_val) 
                     
 
-            self.update_screen(200)
+            self.update_screen(300)
 
     def handle_events(self):
         # Handle events
