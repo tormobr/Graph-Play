@@ -45,6 +45,7 @@ class Node():
 
 class Game():
     def __init__(self):
+        self.screen_w = 1200
         self.w = 820
         self.h = 820
         self.block_size = 20
@@ -55,7 +56,7 @@ class Game():
         self.h_factor = 1
 
         pygame.display.set_caption("Algo Tester")
-        self.screen = pygame.display.set_mode((self.w, self.h))
+        self.screen = pygame.display.set_mode((self.screen_w, self.h))
         pygame.font.init()
         self.font = pygame.font.SysFont("Comic Sans MS", 30)
         self.clock = pygame.time.Clock()
@@ -83,6 +84,10 @@ class Game():
 
     def check_collision(self, pos, v):
         x, y = pos
+        if x < 0 + self.block_size or x > (self.w - self.block_size)-1:
+            return
+        if y < 0 + self.block_size or y > (self.h - self.block_size)-1:
+            return
         # Get the node pressed
         n = self.nodes[y//self.block_size][x//self.block_size]
         n.update_value(v)
@@ -104,6 +109,7 @@ class Game():
 
     def update_screen(self, ticks=200):
         self.screen.fill(BLACK)
+        pygame.draw.rect(self.screen, WHITE, (self.w, 0, self.screen_w - self.w, self.h))
         self.draw_nodes()
         self.screen.blit(self.text,(self.w//2,0))
         self.clock.tick(ticks)
