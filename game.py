@@ -45,25 +45,57 @@ class Node():
 
 class Game():
     def __init__(self):
-        self.screen_w = 1200
-        self.w = 820
-        self.h = 820
+        self.screen_w = 1300
         self.block_size = 20
+        self.w = 800 + self.block_size
+        self.h = 800 + self.block_size
         self.nodes = self.create_nodes()
         self.start = self.nodes[1][1]
         self.end = self.nodes[-2][-2]
         self.mouse_is_down = False
-        self.h_factor = 1
+        self.h_factor = 2
+        self.num = 0
+        self.h_function = 0
+        self.h_strings = ["Manhatten", "Euclidian"]
 
         pygame.display.set_caption("Algo Tester")
         self.screen = pygame.display.set_mode((self.screen_w, self.h))
         pygame.font.init()
-        self.font = pygame.font.SysFont("Comic Sans MS", 30)
+        self.font_title = pygame.font.SysFont("ubuntumono", 30)
+        self.font_par = pygame.font.SysFont("ubuntumono", 18)
         self.clock = pygame.time.Clock()
-        self.text = self.font.render(f"Heuristic: {self.h_factor}", False, WHITE)
 
     def draw_text(self):
-        self.screen.blit(self.text,(self.w//2,0))
+        instructions = self.font_title.render(f"Intructions:", True, BLACK)
+        self.screen.blit(instructions, (self.w + 15, 55))
+        a = self.font_par.render(f"Press: 'a' for A*", True, BLACK)
+        b = self.font_par.render(f"Press: 'b' for Breath-First", True, BLACK)
+        d = self.font_par.render(f"Press: 'd' for Depth-First", True, BLACK)
+        p = self.font_par.render(f"Press: 'p' for Maze-gen with Prim", True, BLACK)
+        s = self.font_par.render(f"Press: 's' to set start", True, BLACK)
+        e = self.font_par.render(f"Press: 'e' to set end", True, BLACK)
+        r = self.font_par.render(f"Press: 'r' to reset drawing", True, BLACK)
+        u = self.font_par.render(f"Press: 'key UP' to increase heuristic", True, BLACK)
+        do = self.font_par.render(f"Press: 'key DOWN' to decrease heuristic", True, BLACK)
+        scroll = self.font_par.render(f"Press 'Scroll' to change Square Size", True, BLACK)
+        h = self.font_par.render(f"Press: 'h' to change heuristic func", True, BLACK)
+        ins = [a, b, d, p, s, e, r, u, do, scroll, h]
+        for i, t in enumerate(ins):
+            self.screen.blit(t, (self.w + 35, 30*(i+3)))
+
+        BS = self.font_title.render(f"Square Size: {self.block_size}", True, BLACK)
+        steps = self.font_title.render(f"Nodes Visited: {self.num}", True, BLACK)
+        h_func = self.font_title.render(f"Heuristic Function: {self.h_strings[self.h_function]}", True, BLACK)
+        heuristic = self.font_title.render(f"Heuristic Factor: {round(self.h_factor, 1)}", True, BLACK)
+        TITLES = [BS, steps, h_func, heuristic]
+        for i, t in enumerate(TITLES):
+            self.screen.blit(t, (self.w + 15, self.h - 60*(i+1)))
+
+    def zoom(self, v):
+        self.block_size += v
+        self.nodes = self.create_nodes()
+        self.start = self.nodes[1][1]
+        self.end = self.nodes[-2][-2]
     
     def create_nodes(self):
         ret = []
@@ -107,7 +139,8 @@ class Game():
 
     def backtrack(self, path):
         for i, n in enumerate(reversed(path)):
-            n.update_value((min(i*3, 255),max(255-(i*3), 0),min(0, 0)))
+            fac = 255 // len(path) +1
+            n.update_value((min(i*fac, 255),max(255-(i*fac), 0),0))
             self.update_screen(30)
 
     def update_screen(self, ticks=200):
@@ -119,6 +152,7 @@ class Game():
         pygame.display.flip()
 
     def bfs(self, dfs=False):
+        self.num = 0
         self.reset(keep_drawing=True)
         q = deque([(self.start, [])])
         visited = set()
@@ -127,6 +161,7 @@ class Game():
             current, path = q.popleft()
             if current in visited:
                 continue
+            self.num += 1
             visited.add(current)
             if current == self.end:
                 self.backtrack(path)
@@ -147,10 +182,16 @@ class Game():
             self.update_screen(ticks=300)
             current.update_value(LIGHTGRAY)
 
+    def change_heuristic(self):
+        self.h_function = (self.h_function + 1) % 2
+
     def manhatten(self, n):
         dx = abs(n.x - self.end.x)
         dy = abs(n.y - self.end.y)
-        ret = math.sqrt(dx**2 + dy**2)
+        if self.h_function == 0:
+            ret = (dx + dy)
+        elif self.h_function == 1:
+            ret = math.sqrt(dx**2 + dy**2)
         return ret * self.h_factor
 
     def sort_astar(self, q):
@@ -168,6 +209,7 @@ class Game():
         
 
     def astar(self):
+        self.num = 0
         self.reset(keep_drawing=True)
         q = [(self.start, [], 0)]
         visited = set()
@@ -176,6 +218,7 @@ class Game():
             current, path, f = self.sort_astar(q)
             if current in visited:
                 continue
+            self.num += 1
             visited.add(current)
             if current == self.end:
                 self.backtrack(path)
@@ -190,7 +233,9 @@ class Game():
                 q.append((n, new_path, f+1))
                 n.update_value(BLUE)
 
-            self.update_screen(ticks=300)
+            self.update_screen(ticks=400)
+            if not self.handle_events():
+                return
             current.update_value(LIGHTGRAY)
 
     def get_neighbors(self, n, rand=False, exclude_vals=[BLACK, PURPLE], dig=False, jmp=1):
@@ -234,7 +279,6 @@ class Game():
         while walls:
             random.shuffle(walls)
             current = walls.pop(0)
-            print(current)
             if current in visited:
                 continue
             visited.add(current)
@@ -249,18 +293,9 @@ class Game():
 
             frontiers = self.get_neighbors(current, exclude_vals=[WHITE, PURPLE], jmp=2)
             for n in frontiers:
-                self.update_screen(ticks=200)
                 if n.value != WHITE and n not in visited:
                     walls.append(n)
-            #print(current)
-
-            """
-            current.update_value(WHITE) 
-            news = self.get_neighbors(current, exclude_vals=[WHITE, GRAY, RED, GREEN])
-            walls.extend(news)
-            dx = current.x - n.x
-            dy = current.y - n.y
-            """
+            self.update_screen(ticks=400)
 
 
     # Main loop while game active
@@ -312,14 +347,26 @@ class Game():
                 # decrese heuristics
                 if e.key == pygame.K_DOWN:
                     self.h_factor -= .1
-                    self.text = self.font.render(f"Heuristic: {self.h_factor}", False, WHITE)
                 # increase heuristics
                 if e.key == pygame.K_UP:
                     self.h_factor += .1
-                    self.text = self.font.render(f"Heuristic: {self.h_factor}", False, WHITE)
+                # Change heuristic function
+                if e.key == pygame.K_h:
+                    self.change_heuristic()
             if e.type == pygame.MOUSEBUTTONDOWN:
-                self.fill_val = WHITE if e.button == 3 else BLACK
-                self.mouse_is_down = True
+                if e.button == 3:
+                    self.fill_val = WHITE
+                    self.mouse_is_down = True
+                elif e.button == 1:
+                    self.fill_val = BLACK
+                    self.mouse_is_down = True
+                elif e.button == 4:
+                    if self.block_size < 100:
+                        self.zoom(1)
+                elif e.button == 5:
+                    if self.block_size > 5:
+                        self.zoom(-1)
+
             if e.type == pygame.MOUSEBUTTONUP:
                 self.mouse_is_down = False
         return 1
