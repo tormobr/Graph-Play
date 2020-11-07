@@ -16,19 +16,9 @@ GRAY = (10,100,100)
 RED = (255,0,0)
 GREEN = (0,255,0)
 BLUE = (0,0,255)
-YELLOW = (0,255,255)
-PURPLE = (255,0,255)
+LIGHTGRAY = (150,150,150)
+PURPLE = (128,0,128)
 
-COLORS = {
-    0: BLACK,
-    1: WHITE,
-    2: RED,
-    3: GREEN,
-    4: BLUE,
-    5: YELLOW,
-    6: PURPLE,
-    7: GRAY
-}
 
 os.environ["SDL_VIDEO_CENTERED"] = "1"
 pygame.init()
@@ -78,7 +68,7 @@ class Game():
             for x in range(self.w // self.block_size):
                 val = WHITE
                 if x == 0 or x == self.w // self.block_size -1 or y == 0 or y == self.h // self.block_size -1:
-                    val = GRAY
+                    val = PURPLE
                 new = Node(x, y, self.block_size, val)
                 tmp.append(new)
             ret.append(tmp)
@@ -108,8 +98,8 @@ class Game():
             self.end = n
 
     def backtrack(self, path):
-        for n in reversed(path):
-            n.update_value(PURPLE)
+        for i, n in enumerate(reversed(path)):
+            n.update_value((min(i*3, 255),max(255-(i*3), 0),min(0, 0)))
             self.update_screen(30)
 
     def update_screen(self, ticks=200):
@@ -146,7 +136,7 @@ class Game():
                 n.update_value(BLUE)
 
             self.update_screen(ticks=300)
-            current.update_value(YELLOW)
+            current.update_value(LIGHTGRAY)
 
     def manhatten(self, n):
         dx = abs(n.x - self.end.x)
@@ -192,9 +182,9 @@ class Game():
                 n.update_value(BLUE)
 
             self.update_screen(ticks=300)
-            current.update_value(YELLOW)
+            current.update_value(LIGHTGRAY)
 
-    def get_neighbors(self, n, rand=False, exclude_vals=[BLACK, GRAY], dig=False, jmp=1):
+    def get_neighbors(self, n, rand=False, exclude_vals=[BLACK, PURPLE], dig=False, jmp=1):
         dirs = [(1,0), (0,-1), (-1,0), (0,1)]
         if dig:
             dirs.append((1,1))
@@ -214,7 +204,7 @@ class Game():
         return ret
 
     def reset(self, keep_drawing=False):
-        keep_vals = [WHITE, GRAY]
+        keep_vals = [WHITE, PURPLE]
         if keep_drawing: keep_vals.append(BLACK)
         for row in self.nodes:
             for n in row:
@@ -230,8 +220,7 @@ class Game():
         self.update_screen(ticks=2)
         middle_node = self.nodes[len(self.nodes) // 2][len(self.nodes) // 2]
         #middle_node.update_value(WHITE)
-        walls = self.get_neighbors(self.start, exclude_vals=[WHITE, GRAY, RED], jmp=2)
-        print(walls)
+        walls = self.get_neighbors(self.start, exclude_vals=[WHITE, PURPLE, RED], jmp=2)
         visited = set()
         while walls:
             random.shuffle(walls)
@@ -241,8 +230,7 @@ class Game():
                 continue
             visited.add(current)
               
-            connections  = self.get_neighbors(current, exclude_vals=[BLACK, GRAY, GREEN], jmp=2)
-            print(connections)
+            connections  = self.get_neighbors(current, exclude_vals=[BLACK, PURPLE, GREEN], jmp=2)
             node = random.choice(connections)
             avgx = (current.x + node.x) // 2
             avgy = (current.y + node.y) // 2
@@ -250,9 +238,8 @@ class Game():
             current.update_value(WHITE)
             self.nodes[avgy][avgx].update_value(WHITE)
 
-            frontiers = self.get_neighbors(current, exclude_vals=[WHITE, GRAY], jmp=2)
+            frontiers = self.get_neighbors(current, exclude_vals=[WHITE, PURPLE], jmp=2)
             for n in frontiers:
-                print(n)
                 self.update_screen(ticks=200)
                 if n.value != WHITE and n not in visited:
                     walls.append(n)
