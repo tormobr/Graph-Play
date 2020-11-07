@@ -62,6 +62,9 @@ class Game():
         self.clock = pygame.time.Clock()
         self.text = self.font.render(f"Heuristic: {self.h_factor}", False, WHITE)
 
+    def draw_text(self):
+        self.screen.blit(self.text,(self.w//2,0))
+    
     def create_nodes(self):
         ret = []
         for y in range(self.h // self.block_size):
@@ -111,7 +114,7 @@ class Game():
         self.screen.fill(BLACK)
         pygame.draw.rect(self.screen, WHITE, (self.w, 0, self.screen_w - self.w, self.h))
         self.draw_nodes()
-        self.screen.blit(self.text,(self.w//2,0))
+        self.draw_text()
         self.clock.tick(ticks)
         pygame.display.flip()
 
