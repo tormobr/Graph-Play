@@ -10,7 +10,7 @@ This program uses [pygame](https://www.pygame.org/wiki/about), so make sure to `
 
 ## Images
 
-[Alt text](./images/bfs.png)
-[Alt text](./images/astar.png)
-[Alt text](./images/maze.png)
-[Alt text](./images/big.png)
+![Alt text](./images/bfs.png)
+![Alt text](./images/astar.png)
+![Alt text](./images/maze.png)
+![Alt text](./images/big.png)
