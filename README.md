@@ -10,7 +10,17 @@ This program uses [pygame](https://www.pygame.org/wiki/about), so make sure to `
 
 ## Images
 
+### BFS 
 ![Alt text](./images/bfs.png)
+
+### A\* 
 ![Alt text](./images/astar.png)
+
+### Maze Gen With Prims 
 ![Alt text](./images/maze.png)
+
+### Rescaling Example
 ![Alt text](./images/big.png)
+
+### Demo GIF
+![Alt text](./images/demo.gif)
