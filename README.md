@@ -10,6 +10,9 @@ This program uses [pygame](https://www.pygame.org/wiki/about), so make sure to `
 
 ## Images
 
+### Demo GIF
+![Alt text](./images/demo.gif)
+
 ### BFS 
 ![Alt text](./images/bfs.png)
 
@@ -22,5 +25,3 @@ This program uses [pygame](https://www.pygame.org/wiki/about), so make sure to `
 ### Rescaling Example
 ![Alt text](./images/big.png)
 
-### Demo GIF
-![Alt text](./images/demo.gif)
